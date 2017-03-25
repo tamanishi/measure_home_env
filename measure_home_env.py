@@ -1,6 +1,7 @@
 #coding: utf-8
 
 from smbus import SMBus
+import os
 import datetime
 import json
 import gspread
@@ -141,7 +142,7 @@ def setup():
 	writeReg(0xF5,config_reg)
 
 def writeToSpreadSheet():
-	json_key = json.load(open('gs_credentials.json'))
+	json_key = json.load(open(os.path.abspath('gs_credentials.json')))
 	scope = ['https://spreadsheets.google.com/feeds']
 	credentials = oauth2client.client.SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 	gc = gspread.authorize(credentials)
