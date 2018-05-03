@@ -6,6 +6,8 @@ import datetime
 import json
 import gspread
 import oauth2client.client
+from oauth2client.service_account import ServiceAccountCredentials
+
 
 bus_number  = 1
 i2c_address = 0x76
@@ -142,15 +144,19 @@ def setup():
 	writeReg(0xF5,config_reg)
 
 def writeToSpreadSheet():
-	json_key = json.load(open(os.path.abspath(os.path.dirname(__file__)) + '/gs_credentials.json'))
-	scope = ['https://spreadsheets.google.com/feeds']
-	credentials = oauth2client.client.SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
+	# json_key = json.load(open(os.path.abspath(os.path.dirname(__file__)) + '/gs_credentials.json'))
+        scope = ['https://spreadsheets.google.com/feeds',
+                 'https://www.googleapis.com/auth/drive']
+        # scope = ['https://spreadsheets.google.com/feeds']
+	# credentials = oauth2client.client.SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
+	credentials = ServiceAccountCredentials.from_json_keyfile_name(os.path.abspath(os.path.dirname(__file__)) + '/gs_credentials.json', scope)
 	gc = gspread.authorize(credentials)
 
 	wb = gc.open('home_environment')
 	sh = wb.worksheet('Sheet1')
 	ts = datetime.datetime.today().strftime('%Y/%m/%d %H:%M:%S')
-	sh.append_row([ts, str(env_values['temperature']), str(env_values['pressure']), str(env_values['humidity'])])
+	# sh.append_row([ts, str(env_values['temperature']), str(env_values['pressure']), str(env_values['humidity'])])
+	sh.append_row([ts, env_values['temperature'], env_values['pressure'], env_values['humidity']])
 
 setup()
 get_calib_param()
